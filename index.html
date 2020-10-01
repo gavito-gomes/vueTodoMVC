@@ -3,52 +3,117 @@
 	<head>
 		<meta charset="utf-8">
 		<title>Vue.js • TodoMVC</title>
-		<link rel="stylesheet" href="node_modules/todomvc-common/base.css">
-		<link rel="stylesheet" href="node_modules/todomvc-app-css/index.css">
+		<link rel="stylesheet" href="css/style.css">
 		<style> [v-cloak] { display: none; } </style>
 	</head>
 	<body>
 		<section class="todoapp" v-cloak>
 			<header class="header">
-				<h1>todos</h1>
-				<input class="new-todo" autofocus autocomplete="off" placeholder="What needs to be done?" v-model="newTodo" @keyup.enter="addTodo">
+				<!-- Icon -->
+				<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-clipboard"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect></svg>
+				<h1>Todos</h1>
 			</header>
-			<section class="main" v-show="todos.length">
-				<input id="toggle-all" class="toggle-all" type="checkbox" v-model="allDone">
-				<label for="toggle-all">Mark all as complete</label>
-				<ul class="todo-list">
-					<li class="todo" v-for="todo in filteredTodos" :key="todo.id" :class="{completed: todo.completed, editing: todo == editedTodo}">
-						<div class="view">
-							<input class="toggle" type="checkbox" v-model="todo.completed">
-							<label @dblclick="editTodo(todo)">{{todo.title}}</label>
-							<button class="destroy" @click="removeTodo(todo)"></button>
+			<section class="main">
+				<div class="todolist" v-for="(list, i) in lists" :key="i" :style="{background: list.color}">
+					<div class="todolist-header" @dblclick="editList(i)">
+						<h2 @dblclick="editList(i)">{{list.title}}</h2>
+						<button class="delete" @click="removeList(i)" title="Remove List">
+							<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-x"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+						</button>
+					</div>
+
+					
+					<div class="todolist-filters" v-if="list.todos.length > 0">
+						<div class="select" title="Complete All">
+							<button class="toggle" @click="completeAll(i)">
+							<div class="fake-toggle">
+								<span v-show="filterList(i, 'completed').length == list.todos.length">
+									<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-check"><polyline points="20 6 9 17 4 12"></polyline></svg>
+								</span>
+							</div>
 						</div>
-						<input class="edit" type="text" v-model="todo.title" v-todo-focus="todo == editedTodo" @blur="doneEdit(todo)" @keyup.enter="doneEdit(todo)" @keyup.esc="cancelEdit(todo)">
-					</li>
-				</ul>
+						<div class="filters">
+							<button v-for="(filter, j) in ['all', 'active', 'completed']" :key="j" 
+								:class="{selected: filter == activeFilters[i]}"
+								@click="selectActiveFilter(i, filter)">
+								{{filter | capitalize}}
+							</button>
+						</div>
+					</div>
+
+					<ul class="todolist-main">
+						<li class="todo" v-for="todo in filterList(i, activeFilters[i])" :key="todo.id" :class="{completed: todo.completed, editing: todo == editedTodo}">
+							<div class="view">
+								<div class="align">
+									<input class="toggle" type="checkbox" v-model="todo.completed">
+									<div class="fake-toggle">
+										<span v-show="todo.completed">
+											<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-check"><polyline points="20 6 9 17 4 12"></polyline></svg>
+										</span>
+									</div>
+									<span>{{todo.title}}</span>
+								</div>
+								<button class="destroy" @click="removeTodo(i, todo)">
+									<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-x"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+								</button>
+							</div>
+							<input class="edit" type="text" v-model="todo.title" v-todo-focus="todo == editedTodo" @blur="doneEditTodo(todo)" @keyup.enter="doneEditTodo(todo)">
+						</li>
+					</ul>
+
+					<div class="new-todo" :class="{active: newTodo !== null && newTodoListId == i}">
+						<button @click="addTodo(i)">Add Todo</button>
+						<input autofocus autocomplete="off" placeholder="What needs to be done?" v-model="newTodo" v-todo-focus="newTodoListId == i" @keyup.enter="doneAddTodo(i)" @blur="newTodo = null">
+					</div>
+
+					<div class="todolist-footer">
+						<p>{{filterList(i, 'active').length + ' item' | pluralize(filterList(i, 'active').length)}} left</p>
+						<button @click="removeCompleted(i)">Clear completed</button>
+					</div>
+
+				</div>
+				<button class="new-todolist" @click="addList">New Todo List</button>
+				<div class="modal" v-if="newList">
+					<div class="bg" @click="cancelAddList"></div>
+					<div class="content">
+						<input type="text" v-model="newList.title" placeholder="List title">
+						
+						<ul>
+							<li v-for="color in colors" :class="{selected: color == newList.color}">
+								<button @click="newList.color = color" :style="{background: color}"></button>
+							</li>
+						</ul>
+						<div class="buttons">
+							<button class="cancel" @click="cancelAddList">Cancel</button>
+							<button @click="doneAddList">Save</button>
+						</div>
+					</div>
+				</div>
+				
+				<div class="modal" v-if="editedList">
+					<div class="bg" @click="cancelEditList"></div>
+					<div class="content">
+						<input type="text" v-model="editedList.title" placeholder="List title">
+						<ul>
+							<li v-for="color in colors" :class="{selected: color == editedList.color}">
+								<button @click="editedList.color = color" :style="{background: color}"></button>
+							</li>
+						</ul>
+						<div class="buttons">
+							<button class="cancel" @click="cancelEditList">Cancel</button>
+							<button @click="doneEditList">Save</button>
+						</div>
+					</div>
+				</div>
+
 			</section>
-			<footer class="footer" v-show="todos.length">
-				<span class="todo-count">
-					<strong v-text="remaining"></strong> {{pluralize('item', remaining)}} left
-				</span>
-				<ul class="filters">
-					<li><a href="#/all" :class="{selected: visibility == 'all'}">All</a></li>
-					<li><a href="#/active" :class="{selected: visibility == 'active'}">Active</a></li>
-					<li><a href="#/completed" :class="{selected: visibility == 'completed'}">Completed</a></li>
-				</ul>
-				<button class="clear-completed" @click="removeCompleted" v-show="todos.length > remaining">
-					Clear completed
-				</button>
+				
+			<footer class="info">
+				<p>Part of <a href="http://todomvc.com" target="_blank">TodoMVC</a></p>
 			</footer>
 		</section>
-		<footer class="info">
-			<p>Double-click to edit a todo</p>
-			<p>Written by <a href="http://evanyou.me">Evan You</a></p>
-			<p>Part of <a href="http://todomvc.com">TodoMVC</a></p>
-		</footer>
-		<script src="node_modules/todomvc-common/base.js"></script>
-		<script src="node_modules/director/build/director.js"></script>
-		<script src="node_modules/vue/dist/vue.js"></script>
+		<script src="js/director.js"></script>
+		<script src="js/vue.js"></script>
 		<script src="js/store.js"></script>
 		<script src="js/app.js"></script>
 		<script src="js/routes.js"></script>

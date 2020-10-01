@@ -1,0 +1,110 @@
+[
+    {
+        "id": 0,
+        "title": "List 1",
+        "color": "#EEAB7F",
+        "todos": [
+            {
+                "id": 0,
+                "title": "Todo 1",
+                "completed": false
+            },
+            {
+                "id": 1,
+                "title": "Todo 2",
+                "completed": false
+            },
+            {
+                "id": 2,
+                "title": "Todo 3",
+                "completed": false
+            },
+            {
+                "id": 3,
+                "title": "Todo 4",
+                "completed": false
+            }
+        ]
+    },
+    {
+        "id": 1,
+        "title": "List 2",
+        "color": "",
+        "todos": [
+            {
+                "id": 0,
+                "title": "Todo 1",
+                "completed": false
+            },
+            {
+                "id": 1,
+                "title": "Todo 2",
+                "completed": false
+            },
+            {
+                "id": 2,
+                "title": "Todo 3",
+                "completed": false
+            },
+            {
+                "id": 3,
+                "title": "Todo 4",
+                "completed": false
+            }
+        ]
+    },
+    {
+        "id": 2,
+        "title": "List 3",
+        "color": "",
+        "todos": [
+            {
+                "id": 0,
+                "title": "Todo 1",
+                "completed": false
+            },
+            {
+                "id": 1,
+                "title": "Todo 2",
+                "completed": false
+            },
+            {
+                "id": 2,
+                "title": "Todo 3",
+                "completed": false
+            },
+            {
+                "id": 3,
+                "title": "Todo 4",
+                "completed": false
+            }
+        ]
+    },
+    {
+        "id": 3,
+        "title": "List 4",
+        "color": "",
+        "todos": [
+            {
+                "id": 0,
+                "title": "Todo 1",
+                "completed": false
+            },
+            {
+                "id": 1,
+                "title": "Todo 2",
+                "completed": false
+            },
+            {
+                "id": 2,
+                "title": "Todo 3",
+                "completed": false
+            },
+            {
+                "id": 3,
+                "title": "Todo 4",
+                "completed": false
+            }
+        ]
+    }
+]
